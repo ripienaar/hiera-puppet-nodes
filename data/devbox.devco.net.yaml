@@ -1,10 +1,10 @@
 notify::starting:
-  message: overriden
+  message: start overriden
 
 notify::ending:
-  message: overriden
+  message: ending overriden
 
 x::y: hello
 
 classes:
-  - foo
+  - apache -> foo

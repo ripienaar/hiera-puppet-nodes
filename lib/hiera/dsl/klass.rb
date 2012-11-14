@@ -1,8 +1,7 @@
 class Hiera
   class DSL
     class Klass
-      attr_reader :name, :resources, :resource_collection
-      attr_accessor :previous_class
+      attr_reader :name, :resources, :resource_collection, :depends_on
 
       def initialize(options={})
         raise "Classes need a name" unless options[:name]
@@ -12,11 +11,20 @@ class Hiera
 
         @resources = []
         @resource_collection = options[:resources]
-        @previous_class = nil
+        @depends_on = []
 
         # TODO: use anchors
         add_resource(@resource_collection.new_resource(:type => :notify, :name => "%s_start_anchor" % @name))
 
+      end
+
+      def add_dependency(dep)
+        return if depends_on.include?(dep)
+        depends_on << dep
+      end
+
+      def to_s
+        "#<%s:%s>" % [self.class, @name]
       end
 
       def add_to_scope(scope)
@@ -53,9 +61,11 @@ class Hiera
 
         # unless our previous class was also added inside us we add
         # a dependency between us and previous class
-        if @previous_class && !has_resource?(:class, @previous_class)
-          k = compiler.catalog.resource(:class, @previous_class.to_sym)
-          klass.set_parameter(:require, [klass[:require]].flatten.compact << k)
+        @depends_on.each do |previous_class|
+          if previous_class && !has_resource?(:class, previous_class)
+            k = compiler.catalog.resource(:class, previous_class.to_sym)
+            klass.set_parameter(:require, [klass[:require]].flatten.compact << k)
+          end
         end
       end
 

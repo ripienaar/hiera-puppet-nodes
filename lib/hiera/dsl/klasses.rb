@@ -7,6 +7,12 @@ class Hiera
         @klasses = []
       end
 
+      def each
+        @klasses.each do |k|
+          yield(k)
+        end
+      end
+
       def [](index)
         @klasses[index]
       end

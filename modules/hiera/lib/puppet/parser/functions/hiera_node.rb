@@ -3,62 +3,27 @@ module Puppet::Parser::Functions
     require "lib/hiera/dsl.rb"
     require "pp"
 
-    klasses = function_hiera_array(["classes"])
-
     h_r = Hiera::DSL::Resources.new
     h_k = Hiera::DSL::Klasses.new
 
-    # add all the classes ignoring ordering and relationships
-    klasses.map{|a| a.split(/\s*->\s*/)}.flatten.each do |klass_name|
-      h_k.new_class(:name => klass_name, :resources => h_r)
+    classes = function_hiera_array(["classes"])
 
-      module_file = File.join(Hiera::Config[:yaml][:datadir], "classes", "#{klass_name}.yaml")
+    # create the various H::D::Klass resources
+    Hiera::DSL.create_classes(classes, h_r, h_k)
 
-      raise "Cannot find class %s" % klass_name unless File.exist?(module_file)
+    # walk the classes list finding any ordering hints and add
+    # them to our internal structures
+    Hiera::DSL.add_relationships_to_classes(classes, h_k)
 
-      klass_resources = YAML.load_file(module_file)
-
-      raise "Could not find any resources in %s" % module_file unless klass_resources["resources"]
-
-      klass_resources["resources"].each do |resources|
-        resources.keys.each do |type|
-          resources[type].each do |resource_of_type|
-            if resource_of_type.is_a?(String)
-              resource_of_type = {resource_of_type => {}}
-            end
-
-            resource_of_type.keys.each do |name|
-              override_name = "%s::%s" % [type, name]
-              overrides = function_hiera_hash([override_name, {}])
-
-              h_k.find(klass_name).add_resource(r = h_r.new_resource(:type => type, :name => name, :properties => resource_of_type[name]))
-              r.merge!(overrides)
-            end
-          end
-        end
-      end
-
-      h_k.find(klass_name).add_to_scope(self)
+    # read the class yaml file containing resources, add all the resources
+    # to internal structures in the right H::D::Klass and finally add the
+    # H::D::Klass to puppet
+    classes.map{|a| a.split(/\s*->\s*/)}.flatten.uniq.each do |klass_name|
+      Hiera::DSL.add_resources_from_file(klass_name, self, h_r, h_k)
     end
 
-    # now add relationships where specified
-    klasses.map{|a| a.split(/\s*->\s*/)}.each do |klass|
-      if klass.is_a?(Array)
-        previous = nil
-
-        klass.each do |k|
-          if previous
-            pk = compiler.catalog.resource(:class, previous.to_sym)
-            ck = compiler.catalog.resource(:class, k)
-
-            ck.set_parameter(:require, [ck[:require]].flatten.compact << pk)
-
-            previous = k
-          else
-            previous = k
-          end
-        end
-      end
-    end
+    # with all our classes in puppet we can now add the ordering we
+    # need into the puppet catalog
+    Hiera::DSL.add_class_relationships_to_puppet(classes, compiler.catalog, h_k)
   end
 end
