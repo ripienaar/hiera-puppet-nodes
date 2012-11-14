@@ -2,7 +2,7 @@ class Hiera
   class DSL
     class Klass
       attr_reader :name, :resources, :resource_collection
-      attr_accessor :previous_class, :next_class
+      attr_accessor :previous_class
 
       def initialize(options={})
         raise "Classes need a name" unless options[:name]
@@ -12,6 +12,7 @@ class Hiera
 
         @resources = []
         @resource_collection = options[:resources]
+        @previous_class = nil
 
         # TODO: use anchors
         add_resource(@resource_collection.new_resource(:type => :notify, :name => "%s_start_anchor" % @name))
@@ -29,6 +30,7 @@ class Hiera
         klass.scope.resource = klass
 
         compiler.add_class(@name)
+        compiler.catalog.add_resource(klass)
         compiler.catalog.add_edge(main_stage, klass)
 
         each_resource do |resource|
@@ -39,13 +41,21 @@ class Hiera
           end
 
           if resource.previous_resource
-            previous = @resource_collection[resource.previous_resource]
+            previous_idx = @resources[resource.previous_resource]
+            previous = @resource_collection[previous_idx]
             previous_resource = compiler.catalog.resource(previous.type, previous.name)
 
             p_r.set_parameter(:require, [p_r[:require]].flatten.compact <<  previous_resource)
           end
 
           compiler.add_resource(klass.scope, p_r)
+        end
+
+        # unless our previous class was also added inside us we add
+        # a dependency between us and previous class
+        if @previous_class && !has_resource?(:class, @previous_class)
+          k = compiler.catalog.resource(:class, @previous_class.to_sym)
+          klass.set_parameter(:require, [klass[:require]].flatten.compact << k)
         end
       end
 
@@ -75,6 +85,15 @@ class Hiera
         resource.previous_resource = previous_resource(idx)
 
         @resource_collection[resource.previous_resource].next_resource = idx if resource.previous_resource
+
+        resource
+      end
+
+      def has_resource?(type, title)
+        @resources.select {|idx|
+          r = @resource_collection[idx]
+          r.type.to_s == type.to_s && r.name.to_s == name.to_s
+        }.to_a.size == 1
       end
     end
   end

@@ -3,3 +3,8 @@ notify::starting:
 
 notify::ending:
   message: overriden
+
+x::y: hello
+
+classes:
+  - foo

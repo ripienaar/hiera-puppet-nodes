@@ -10,7 +10,8 @@ resources:
         content: bar
 
   - notify:
-    - ending
+    - ending:
+        notify: Class[x]
 
   - class:
     - x

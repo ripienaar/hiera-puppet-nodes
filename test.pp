@@ -14,6 +14,7 @@ node "default" {
        klass.scope.resource = klass
 
        compiler.add_class("dynamic")
+       compiler.catalog.add_resource(klass)
        compiler.catalog.add_edge(main_stage, klass)
 
        date = Puppet::Parser::Resource.new(:exec, "/bin/date", :scope => klass.scope)

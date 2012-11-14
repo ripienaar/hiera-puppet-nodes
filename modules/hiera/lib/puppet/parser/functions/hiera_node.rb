@@ -3,13 +3,14 @@ module Puppet::Parser::Functions
     require "lib/hiera/dsl.rb"
     require "pp"
 
-
     klasses = function_hiera_array(["classes"])
 
     h_r = Hiera::DSL::Resources.new
+    h_k = Hiera::DSL::Klasses.new
 
-    klasses.each do |klass_name|
-      klass = Hiera::DSL::Klass.new(:name => klass_name, :resources => h_r)
+    # add all the classes ignoring ordering and relationships
+    klasses.map{|a| a.split(/\s*->\s*/)}.flatten.each do |klass_name|
+      h_k.new_class(:name => klass_name, :resources => h_r)
 
       module_file = File.join(Hiera::Config[:yaml][:datadir], "classes", "#{klass_name}.yaml")
 
@@ -23,26 +24,41 @@ module Puppet::Parser::Functions
         resources.keys.each do |type|
           resources[type].each do |resource_of_type|
             if resource_of_type.is_a?(String)
-              override_name = "%s::%s" % [type, resource_of_type]
+              resource_of_type = {resource_of_type => {}}
+            end
+
+            resource_of_type.keys.each do |name|
+              override_name = "%s::%s" % [type, name]
               overrides = function_hiera_hash([override_name, {}])
 
-              klass.add_resource(r = h_r.new_resource(:type => type, :name => resource_of_type))
+              h_k.find(klass_name).add_resource(r = h_r.new_resource(:type => type, :name => name, :properties => resource_of_type[name]))
               r.merge!(overrides)
-
-            elsif resource_of_type.is_a?(Hash)
-              resource_of_type.keys.each do |name|
-                override_name = "%s::%s" % [type, name]
-                overrides = function_hiera_hash([override_name, {}])
-
-                klass.add_resource(r = h_r.new_resource(:type => type, :name => name, :properties => resource_of_type[name]))
-                r.merge!(overrides)
-              end
             end
           end
         end
       end
 
-      klass.add_to_scope(self)
+      h_k.find(klass_name).add_to_scope(self)
+    end
+
+    # now add relationships where specified
+    klasses.map{|a| a.split(/\s*->\s*/)}.each do |klass|
+      if klass.is_a?(Array)
+        previous = nil
+
+        klass.each do |k|
+          if previous
+            pk = compiler.catalog.resource(:class, previous.to_sym)
+            ck = compiler.catalog.resource(:class, k)
+
+            ck.set_parameter(:require, [ck[:require]].flatten.compact << pk)
+
+            previous = k
+          else
+            previous = k
+          end
+        end
+      end
     end
   end
 end
