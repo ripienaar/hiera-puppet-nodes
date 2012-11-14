@@ -1,0 +1,5 @@
+notify::starting:
+  message: overriden
+
+notify::ending:
+  message: overriden

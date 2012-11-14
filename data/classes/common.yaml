@@ -1,0 +1,16 @@
+resources:
+  - notify:
+    - starting
+
+  - file:
+    - /tmp/foo:
+        content: hello
+
+    - /tmp/bar:
+        content: bar
+
+  - notify:
+    - ending
+
+  - class:
+    - x

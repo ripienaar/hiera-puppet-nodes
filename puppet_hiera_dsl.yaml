@@ -1,0 +1,50 @@
+groups/apache.yaml:
+
+resources:
+  # if possible actually create a class and put these
+  # resources in that class to be sure we can later
+  # reference them by class name rather than indiv
+  # resources if not we might need to track the first
+  # and last resource and reference those as a kind of
+  # anchor
+
+  - class:   # includes the class, paramters from hiera
+    - x      # by default thanks to puppet 3, ordering
+             # set like with modules below
+
+  - package:
+    - apache                 # this is an alias, the real name will
+        ensure: present      # be this or whatever is overrode in
+                             # the hierarchy
+
+  - file:
+    - /etc/httpd/apache.conf
+        source: puppet://.....
+        notify: Service[apache]
+
+  - service:
+    - apache
+        enabled: true
+        ensure: running
+
+  - apache::vhost
+    - foo.com
+
+devco.net.yaml
+  stage_main: [zsh, [mysql, apache]] # array merged so that it becomes users, zsh, [mysql, apache]
+                                     # implies ordering users, zsh, mysql->apache
+                                     #
+                                     # if a module has no init.yaml it will just get included
+                                     # old style and some attempts will be made with ordering
+                                     # but cant really be solid due to how puppet works
+
+  package::apache  {name: httpd, provider: rpm}
+
+common.yaml
+  stages: [pre, main, post]
+
+  stage_pre: [yum::repos]
+
+  stage_main: [users]
+
+  stage_post: [reboot]
