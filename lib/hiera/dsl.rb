@@ -15,6 +15,27 @@ class Hiera
       end
     end
 
+    def self.parse_string_for_hiera_var(string, scope)
+      data = string.clone
+
+      if data.is_a?(String)
+        while data =~ /\$\{(.+?)\}/
+          hieravar = $1
+          value = scope.function_hiera([hieravar])
+
+          raise("Could not find a value for %s in %s" % [hieravar, data]) unless value
+
+          data.gsub!(/\$\{.+?\}/, value)
+        end
+      elsif data.is_a?(Hash)
+        data.keys.each do |key|
+          data[key] = parse_string_for_hiera_var(data[key], scope)
+        end
+      end
+
+      data
+    end
+
     # add resources in a file to the classes in our internal structures
     # and then add each class with its resources to puppet
     def self.add_resources_from_file(class_name, scope, h_r, h_k)
@@ -30,14 +51,14 @@ class Hiera
         resources.keys.each do |type|
           resources[type].each do |resource_of_type|
             if resource_of_type.is_a?(String)
-              resource_of_type = {resource_of_type => {}}
+              resource_of_type = {parse_string_for_hiera_var(resource_of_type, scope) => {}}
             end
 
             resource_of_type.keys.each do |name|
               override_name = "%s::%s" % [type, name]
-              overrides = scope.function_hiera_hash([override_name, {}])
+              overrides = parse_string_for_hiera_var(scope.function_hiera_hash([override_name, {}]), scope)
 
-              h_k.find(class_name).add_resource(r = h_r.new_resource(:type => type, :name => name, :properties => resource_of_type[name]))
+              h_k.find(class_name).add_resource(r = h_r.new_resource(:type => type, :name => name, :properties => parse_string_for_hiera_var(resource_of_type[name], scope)))
               r.merge!(overrides)
             end
           end

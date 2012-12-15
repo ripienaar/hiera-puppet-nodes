@@ -2,9 +2,11 @@ notify::starting:
   message: start overriden
 
 notify::ending:
-  message: ending overriden
+  message: ending overriden with ${nodevar}
 
 x::y: hello
+
+nodevar: node var value
 
 classes:
   - apache -> foo

@@ -13,8 +13,7 @@ class Hiera
         @resource_collection = options[:resources]
         @depends_on = []
 
-        # TODO: use anchors
-        add_resource(@resource_collection.new_resource(:type => :notify, :name => "%s_start_anchor" % @name))
+        add_resource(@resource_collection.new_resource(:type => :anchor, :name => "%s_start_anchor" % @name))
 
       end
 

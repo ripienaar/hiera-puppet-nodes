@@ -13,5 +13,8 @@ resources:
     - ending:
         notify: Class[x]
 
+  - notify:
+    - ${nodevar}
+
   - class:
     - x

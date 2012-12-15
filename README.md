@@ -124,18 +124,10 @@ Output?
 There is a fully worked example in *hieradata* and *puppet_test.pp*
 which produce the following output:
 
-    common_start_anchor
-    /Stage[main]/Common/Notify[common_start_anchor]/message: defined 'message' as 'common_start_anchor'
     start overriden
     /Stage[main]/Common/Notify[starting]/message: defined 'message' as 'start overriden'
     ending overriden
     /Stage[main]/Common/Notify[ending]/message: defined 'message' as 'ending overriden'
     /Stage[main]/X/Exec[/bin/echo 'inside x y is hello']: Triggered 'refresh' from 1 events
-    apache_start_anchor
-    /Stage[main]/Apache/Notify[apache_start_anchor]/message: defined 'message' as 'apache_start_anchor'
-    foo_start_anchor
-    /Stage[main]/Foo/Notify[foo_start_anchor]/message: defined 'message' as 'foo_start_anchor'
     Finished catalog run in 0.44 seconds
 
-Note I use a notify as an anchor, this is basically a TODO to use the
-anchor resources from stdlib but did not have it with me one the plane
