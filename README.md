@@ -124,6 +124,12 @@ replaced with the string *uk*
 
 And finally we supply the *y* parameter to the parameterized class *x*
 
+Now you just need to activate these nodes in Puppet:
+
+    node default {
+      hiera_node()
+    }
+
 Output?
 -------
 
