@@ -131,17 +131,11 @@ which produce the following output:
     ending overriden
     /Stage[main]/Common/Notify[ending]/message: defined 'message' as 'ending overriden'
     /Stage[main]/X/Exec[/bin/echo 'inside x y is hello']: Triggered 'refresh' from 1 events
-    common_end_anchor
-    /Stage[main]/Common/Notify[common_end_anchor]/message: defined 'message' as 'common_end_anchor'
     apache_start_anchor
     /Stage[main]/Apache/Notify[apache_start_anchor]/message: defined 'message' as 'apache_start_anchor'
-    apache_end_anchor
-    /Stage[main]/Apache/Notify[apache_end_anchor]/message: defined 'message' as 'apache_end_anchor'
     foo_start_anchor
     /Stage[main]/Foo/Notify[foo_start_anchor]/message: defined 'message' as 'foo_start_anchor'
-    foo_end_anchor
-    /Stage[main]/Foo/Notify[foo_end_anchor]/message: defined 'message' as 'foo_end_anchor'
-    Finished catalog run in 0.14 seconds
+    Finished catalog run in 0.44 seconds
 
 Note I use a notify as an anchor, this is basically a TODO to use the
 anchor resources from stdlib but did not have it with me one the plane

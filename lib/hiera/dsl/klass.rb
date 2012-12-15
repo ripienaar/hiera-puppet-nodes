@@ -29,7 +29,7 @@ class Hiera
 
       def add_to_scope(scope)
         # TODO: use anchors
-        add_resource(@resource_collection.new_resource(:type => :notify, :name => "%s_end_anchor" % @name))
+        add_resource(@resource_collection.new_resource(:type => :anchor, :name => "%s_end_anchor" % @name))
 
         compiler = scope.compiler
         main_stage = compiler.catalog.resource(:stage, :main)
