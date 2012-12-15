@@ -16,6 +16,11 @@ Main features to consider are:
   * No branching, variables or logic, hierarchy based overrides instead
   * Everything including every property of every resource can be managed by hiera
   * Resources are added in a top down manner
+  * In any resource name or string value of any property ${foo} does hiera('foo')
+
+With the hirarchy supplying data and any data, properties, classes
+and resource names being overridable there is no very little reason
+for branching or loops - which Puppet doesn't do anyway.
 
 **NOTE::** This is at best an exploration of the idea and
 not intended for every day use.  The code was written on
@@ -44,6 +49,11 @@ I can imagine versioned classes, or classes that require signoff
 before release to the estate or general workflows, simply because
 all you need is a database and something to provide the data to
 hiera, how you get there is up to you.
+
+A possible use case for something like this would be a scenario
+Puppet module authors write good traditional Puppet modules but
+the less programming-inclined team members can use a system like
+this to use those modules without any programming knowledge.
 
 Example?
 --------
