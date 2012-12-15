@@ -102,12 +102,14 @@ Now lets look at the node specific YAML file:
       - apache -> webapp
 
     notify::starting:
-      message: start overriden
+      message: start for country ${country}
 
     notify::ending:
       message: ending overriden
 
     x::y: hello
+
+    country: uk
 
 Here we add a 3rd class called webapp which should depend on the
 apache class.
@@ -115,6 +117,10 @@ apache class.
 We override the *message* property of the *Notify[starting]* and
 *Notify[ending]* resources that were defined in the common class
 earlier.
+
+Note the override for the *Notify[starting]* resource has a ${country}
+string in it which will be looked up in hiera - in this case this gets
+replaced with the string *uk*
 
 And finally we supply the *y* parameter to the parameterized class *x*
 

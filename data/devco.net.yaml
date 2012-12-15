@@ -1,12 +1,12 @@
+classes:
+  - apache -> foo
+
 notify::starting:
-  message: start overriden
+  message: start for country ${country}
 
 notify::ending:
-  message: ending overriden with ${nodevar}
+  message: ending overriden
 
 x::y: hello
 
-nodevar: node var value
-
-classes:
-  - apache -> foo
+country: uk
