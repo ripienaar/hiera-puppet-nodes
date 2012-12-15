@@ -130,10 +130,9 @@ Output?
 There is a fully worked example in *hieradata* and *puppet_test.pp*
 which produce the following output:
 
-    start overriden
-    /Stage[main]/Common/Notify[starting]/message: defined 'message' as 'start overriden'
-    ending overriden
-    /Stage[main]/Common/Notify[ending]/message: defined 'message' as 'ending overriden'
-    /Stage[main]/X/Exec[/bin/echo 'inside x y is hello']: Triggered 'refresh' from 1 events
-    Finished catalog run in 0.44 seconds
-
+      start for country uk
+      /Stage[main]/Common/Notify[starting]/message: defined 'message' as 'start for country uk'
+      ending overriden
+      /Stage[main]/Common/Notify[ending]/message: defined 'message' as 'ending overriden'
+      /Stage[main]/X/Exec[/bin/echo 'inside x y is hello']: Triggered 'refresh' from 1 events
+      Finished catalog run in 0.38 seconds
